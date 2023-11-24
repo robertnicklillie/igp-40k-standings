@@ -1,1 +1,0 @@
-const testerVar = "test me";
