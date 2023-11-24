@@ -5,7 +5,7 @@
 // ghjkghjk	85	Tau	fghjghj	67	Tau	12/7/2023
 // hjklhjkl	83	Tau	zxcvzxcv	37	Tau	12/10/2023
 // ertyrty	63	Tau	qwerqwre	38	Tau	12/12/2023
-import useState from "react";
+import React, { useState } from 'react';
 
 export default function Dashboard() {
   const matchesFromApi = [
@@ -47,7 +47,7 @@ export default function Dashboard() {
     },
   ];
 
-  const [matches, setMatches] = useState(matchesFromApi);
+  const [matches] = useState(matchesFromApi);
 
   return (
     <div>
