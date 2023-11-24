@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/igp-40k-standings/static/css/main.f855e6bc.css",
+    "main.js": "/igp-40k-standings/static/js/main.bd2fa201.js",
+    "static/js/787.5823b9fe.chunk.js": "/igp-40k-standings/static/js/787.5823b9fe.chunk.js",
+    "index.html": "/igp-40k-standings/index.html",
+    "main.f855e6bc.css.map": "/igp-40k-standings/static/css/main.f855e6bc.css.map",
+    "main.bd2fa201.js.map": "/igp-40k-standings/static/js/main.bd2fa201.js.map",
+    "787.5823b9fe.chunk.js.map": "/igp-40k-standings/static/js/787.5823b9fe.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.f855e6bc.css",
+    "static/js/main.bd2fa201.js"
+  ]
+}
