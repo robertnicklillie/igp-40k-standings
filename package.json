@@ -2,7 +2,7 @@
   "name": "igp-40-standings",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://robertnicklillie.github.io/igp-40k-standings/",
+  "homepage": "http://robertnicklillie.github.io/igp-40k-standings/",
   "dependencies": {
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
