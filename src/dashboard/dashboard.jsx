@@ -6,6 +6,7 @@
 // hjklhjkl	83	Tau	zxcvzxcv	37	Tau	12/10/2023
 // ertyrty	63	Tau	qwerqwre	38	Tau	12/12/2023
 import React, { useState } from 'react';
+import {Table, TableBody, TableCell, TableHead, TableRow} from '@mui/material';
 
 export default function Dashboard() {
   const matchesFromApi = [
@@ -53,42 +54,42 @@ export default function Dashboard() {
     <div>
       <h1>Standings for IGP 40K League</h1>
       <p>Week x</p>
-      <table>
-        <thead>
-          <tr>
-            <th>Rank</th>
-            <th>Avg LEAGUE Score</th>
-            <th>Player</th>
-            <th>Army</th>
-            <th>Match 1</th>
-            <th>Match 2</th>
-            <th>Match 3</th>
-            <th>Match 4</th>
-          </tr>
-        </thead>
-        <tbody>
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell>Rank</TableCell>
+            <TableCell>Avg LEAGUE Score</TableCell>
+            <TableCell>Player</TableCell>
+            <TableCell>Army</TableCell>
+            <TableCell>Match 1</TableCell>
+            <TableCell>Match 2</TableCell>
+            <TableCell>Match 3</TableCell>
+            <TableCell>Match 4</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
           {matches.length === 0 ? (
-            <tr>
-              <td colspan="8">No matches played means no one is ranked.</td>
-            </tr>
+            <TableRow>
+              <TableCell colspan="8">No matches played means no one is ranked.</TableCell>
+            </TableRow>
           ) : (
             matches.map((match) => {
               return (
-                <tr>
-                  <td>{match.playerOne}</td>
-                  <td>{match.playerOne}</td>
-                  <td>{match.playerOne}</td>
-                  <td>{match.playerOne}</td>
-                  <td>{match.playerOne}</td>
-                  <td>{match.playerOne}</td>
-                  <td>{match.playerOne}</td>
-                  <td>{match.playerOne}</td>
-                </tr>
+                <TableRow>
+                  <TableCell>{match.playerOne}</TableCell>
+                  <TableCell>{match.playerOne}</TableCell>
+                  <TableCell>{match.playerOne}</TableCell>
+                  <TableCell>{match.playerOne}</TableCell>
+                  <TableCell>{match.playerOne}</TableCell>
+                  <TableCell>{match.playerOne}</TableCell>
+                  <TableCell>{match.playerOne}</TableCell>
+                  <TableCell>{match.playerOne}</TableCell>
+                </TableRow>
               );
             })
           )}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </div>
   );
 }
