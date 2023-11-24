@@ -93,6 +93,18 @@ const analyzeMatches = () => {
   }
 };
 
+const getLeagueWeek = (leagueStartDate, leagueEndDate, date) => {
+  const startDate = new Date(leagueStartDate);
+  const endDate = new Date(leagueEndDate);
+
+  let dayOfWeek = startDate.getDay();
+  do {
+    dayOfWeek = 
+  } while (dayOfWeek !== 2)
+
+  startDate.
+}
+
 const StandingsBuilder = () => {
   return {
     analyzeMatches: analyzeMatches,
