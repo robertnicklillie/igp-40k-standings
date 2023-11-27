@@ -36,17 +36,13 @@ const getLeagueWeek = (startDate, endDate, matchDate) => {
     let finalWeek = 0;
     let dayFinalWeek = 31;
     do {
-        finalWeek = dayjs(`12/${(`12/30/${weekOneYear}`);
-    } while ()
+        finalWeek = dayjs(`12/${dayFinalWeek--}/${weekOneYear}`).week();
+    } while (finalWeek < 51)
 
-    const yearWeekOffset = dayjs(`12/31/${weekOneYear}`).week() - weekOne + 1;
-    console.info(`12/31/${weekOneYear}`);
-    console.info(dayjs(`12/30/${weekOneYear}`).weekYear());
-    matchWeek = _matchDate.week() + 1 + yearWeekOffset;
+    const yearWeekOffset = finalWeek - weekOne + 1;
+    matchWeek = _matchDate.week() + yearWeekOffset;
   }
-
-  console.info(matchWeek);
   return matchWeek;
 };
 
-getLeagueWeek("11/30/2023", "3/31/2024", "1/14/2024");
+console.info(getLeagueWeek("11/26/2023", "3/31/2024", "2/12/2024"));

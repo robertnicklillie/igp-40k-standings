@@ -65,9 +65,6 @@ const analyzeMatches = () => {
   let leagueSeasonStart = new Date("11/23/2023 11:59");
   let leagueSeasonEnd = new Date("3/31/2024 11:59");
   let leagueSeasonDayStart = 2; //Tuesday
-  
-  
-  
 
   let playerRankings;
 
@@ -81,29 +78,15 @@ const analyzeMatches = () => {
     }
   });
 
-  matches.forEach(match => {
+  matches.forEach((match) => {
     let playerOne = playerRankings[match.playerOne];
     let playerTwo = playerRankings[match.playerTwo];
-
-
   });
 
   for (let x = 0; x < matches.length; x++) {
     let match = playerRankings[matches[x]];
   }
 };
-
-const getLeagueWeek = (leagueStartDate, leagueEndDate, date) => {
-  const startDate = new Date(leagueStartDate);
-  const endDate = new Date(leagueEndDate);
-
-  let dayOfWeek = startDate.getDay();
-  do {
-    dayOfWeek = 
-  } while (dayOfWeek !== 2)
-
-  startDate.
-}
 
 const StandingsBuilder = () => {
   return {
