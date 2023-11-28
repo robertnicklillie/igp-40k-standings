@@ -35,6 +35,11 @@ export default function Dashboard() {
     setDisplay(Display.Validation);
   };
 
+  const handleGenerateStandings = () => {
+    // do the stuff with matches and standings
+    setDisplay(Display.Standings);
+  };
+
   const _standings = [
     {
       key: uuid(),
@@ -224,7 +229,7 @@ export default function Dashboard() {
         <>
           <ValidationTable players={players} matches={matches} />
           <div style={{ paddingTop: "20px" }}>
-            <Button type="primary">
+            <Button type="primary" onClick={handleGenerateStandings}>
               Generate Standings
             </Button>
           </div>
