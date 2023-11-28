@@ -1,3 +1,5 @@
+import { v4 as uuid } from "uuid";
+
 const armyHashMap = {
   "Adepta Sororitas": {},
   "Adeptus Custodes": {},
@@ -50,12 +52,17 @@ const parsePlayers = (data) => {
     const cols = splitIntoColumns(row);
     if (cols[0] !== "Player") {
       if (cols?.length > 0 && cols[0]) {
+        // add player to the players set
         players.push({
+          key: uuid(),
           name: cols[0],
           army: cols[1],
           isArmyValid: armyHashMap.hasOwnProperty(cols[1]),
           isActive: cols[2] === "",
         });
+
+        // add player to the player hash map
+        playerHashMap[cols[0]] = cols[0];
       }
     }
   });
@@ -69,20 +76,17 @@ const parseMatches = (data) => {
     if (cols[0] !== "Player 1") {
       if (cols?.length > 0 && cols[0] !== null && cols[0] !== "") {
         matches.push({
-          player1: {
-            name: cols[0],
-            isNameValid: playerHashMap.hasOwnProperty(cols[0]),
-            army: cols[1],
-            isArmyValid: armyHashMap.hasOwnProperty(cols[1]),
-            score: cols[2],
-          },
-          player2: {
-            name: cols[3],
-            isNameValid: playerHashMap.hasOwnProperty(cols[3]),
-            army: cols[4],
-            isArmyValid: armyHashMap.hasOwnProperty(cols[4]),
-            score: cols[5],
-          },
+          key: uuid(),
+          player1: cols[0],
+          player1IsNameValid: playerHashMap.hasOwnProperty(cols[0]),
+          player1Army: cols[1],
+          player1IsArmyValid: armyHashMap.hasOwnProperty(cols[1]),
+          player1Score: cols[2],
+          player2: cols[3],
+          player2IsNameValid: playerHashMap.hasOwnProperty(cols[3]),
+          player2Army: cols[4],
+          player2IsArmyValid: armyHashMap.hasOwnProperty(cols[4]),
+          player2Score: cols[5],
           date: cols[6],
         });
       }

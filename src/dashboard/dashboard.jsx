@@ -6,14 +6,19 @@ import Standings from "./standings";
 import MatchImporter from "../services/MatchImporter";
 import ValidationTable from "./validationTable";
 
+const Display = {
+  Form: "Form",
+  Validation: "Validation",
+  Standings: "Standings",
+}
+
 export default function Dashboard() {
-  const [importMatches, setImportMatches] = useState(false);
-  const [displayValidation, setDisplayValidation] = useState(false);
-  const [displayStandings, setDisplayStandings] = useState(false);
+  const [display, setDisplay] = useState(Display.Form);
 
   const [playerData, setPlayerData] = useState("");
-  const [players, setPlayers] = useState(null);
   const [matchData, setMatchData] = useState("");
+
+  const [players, setPlayers] = useState(null);
   const [matches, setMatches] = useState(null);
 
   const handlePlayersChange = (event) => {
@@ -22,6 +27,12 @@ export default function Dashboard() {
 
   const handleMatchesChange = (event) => {
     setMatchData(event.target.value);
+  };
+
+  const handleImportMatches = () => {
+    setPlayers(MatchImporter.ParsePlayers(playerData));
+    setMatches(MatchImporter.ParseMatches(matchData));
+    setDisplay(Display.Validation);
   };
 
   const _standings = [
@@ -116,17 +127,8 @@ export default function Dashboard() {
   ];
 
   useEffect(() => {
-    if (importMatches) {
-      setImportMatches(false);
-
-      setPlayers(MatchImporter.ParsePlayers(playerData));
-      setMatches(MatchImporter.ParseMatches(matchData));
-
-      setDisplayValidation(true);
-    }
-  }, [importMatches]);
-
-  useEffect(() => {}, [displayValidation]);
+    
+  }, [display]);
 
   const matchesByPlayer = {
     Larry: [
@@ -193,18 +195,7 @@ export default function Dashboard() {
 
   return (
     <>
-      {displayStandings ? (
-        <Standings data={_standings} matchesByPlayer={matchesByPlayer} />
-      ) : displayValidation ? (
-        <>
-          <ValidationTable players={players} matches={matches} />
-          <div style={{ paddingTop: "20px" }}>
-            <Button type="primary" onClick={() => setImportMatches(true)}>
-              Generate Standings
-            </Button>
-          </div>
-        </>
-      ) : (
+      {display === Display.Form && (
         <>
           <div>
             <h2>Players</h2>
@@ -223,11 +214,24 @@ export default function Dashboard() {
             ></TextArea>
           </div>
           <div style={{ paddingTop: "20px" }}>
-            <Button type="primary" onClick={() => setImportMatches(true)}>
+            <Button type="primary" onClick={handleImportMatches}>
               Import Matches
             </Button>
           </div>
         </>
+      )}
+      {display === Display.Validation && (
+        <>
+          <ValidationTable players={players} matches={matches} />
+          <div style={{ paddingTop: "20px" }}>
+            <Button type="primary">
+              Generate Standings
+            </Button>
+          </div>
+        </>
+      )}
+      {display === Display.Standings && (
+        <Standings data={_standings} matchesByPlayer={matchesByPlayer} />
       )}
     </>
   );
