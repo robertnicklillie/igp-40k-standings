@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/igp-40k-standings/static/css/main.0d88b618.css",
-    "main.js": "/igp-40k-standings/static/js/main.9018f8c3.js",
+    "main.js": "/igp-40k-standings/static/js/main.9beab60f.js",
     "static/js/787.5823b9fe.chunk.js": "/igp-40k-standings/static/js/787.5823b9fe.chunk.js",
     "index.html": "/igp-40k-standings/index.html",
     "main.0d88b618.css.map": "/igp-40k-standings/static/css/main.0d88b618.css.map",
-    "main.9018f8c3.js.map": "/igp-40k-standings/static/js/main.9018f8c3.js.map",
+    "main.9beab60f.js.map": "/igp-40k-standings/static/js/main.9beab60f.js.map",
     "787.5823b9fe.chunk.js.map": "/igp-40k-standings/static/js/787.5823b9fe.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.0d88b618.css",
-    "static/js/main.9018f8c3.js"
+    "static/js/main.9beab60f.js"
   ]
 }
