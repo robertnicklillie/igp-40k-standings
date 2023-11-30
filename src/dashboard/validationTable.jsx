@@ -1,10 +1,6 @@
 import { Table, Tag } from "antd";
 
 export default function Standings({ players, matches }) {
-  // name: cols[0],
-  // army: cols[1],
-  // isArmyValid: armyHashMap.hasOwnProperty(cols[1]),
-  // isActive: cols[2] === "",
   const playerColumns = [
     {
       title: "Name",
@@ -28,19 +24,6 @@ export default function Standings({ players, matches }) {
       )
     },
   ];
-
-    // key: uuid(),
-    // player1: cols[0],
-    // player1IsNameValid: playerHashMap.hasOwnProperty(cols[0]),
-    // player1Army: cols[1],
-    // player1IsArmyValid: armyHashMap.hasOwnProperty(cols[1]),
-    // player1Score: cols[2],
-    // player2: cols[3],
-    // player2IsNameValid: playerHashMap.hasOwnProperty(cols[3]),
-    // player2Army: cols[4],
-    // player2IsArmyValid: armyHashMap.hasOwnProperty(cols[4]),
-    // player2Score: cols[5],
-    // date: cols[6],
 
   const matchColumns = [
     {

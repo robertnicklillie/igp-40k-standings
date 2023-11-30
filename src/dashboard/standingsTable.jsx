@@ -1,12 +1,13 @@
-import { Button, Table } from "antd";
+import { Button, Table, Tag } from "antd";
 import React, { useState, useEffect } from "react";
 
-export default function Standings({ data, matchesByPlayer }) {
+
+export default function StandingsTable({ standings, matchesByPlayer }) {
   const [focusPlayer, setFocusPlayer] = useState(null);
   const [playerMatches, setPlayerMatches] = useState({ matches: [] });
 
   // Rank	Avg LEAGUE Score	Player	Army	Match 1	Match 2	Match 3	Match 4
-  const columnsStandings = [
+  const standingsColumns = [
     {
       title: "Rank",
       dataIndex: "rank",
@@ -54,16 +55,29 @@ export default function Standings({ data, matchesByPlayer }) {
     },
   ];
 
-  const columnMatches = [
+  const matchesColumns = [
     {
       title: "Date",
       dataIndex: "matchDate",
       key: "matchDate",
     },
     {
+      title: "League Week",
+      dataIndex: "leagueWeek",
+      key: "leagueWeek",
+    },
+    {
+      title: "Rank",
+      dataIndex: "rank",
+      key: "rank",
+    },
+    {
       title: "Player Score",
       dataIndex: "score",
       key: "score",
+      render: (_, item) => (
+        <Tag key={item.key} color={item.score > item.opponentScore ? "green-inverse" : "red-inverse"}>{item.score}</Tag>
+      )
     },
     {
       title: "Opponent",
@@ -71,9 +85,17 @@ export default function Standings({ data, matchesByPlayer }) {
       key: "opponent",
     },
     {
+      title: "Opponent Rank",
+      dataIndex: "opponentRank",
+      key: "opponentRank",
+    },
+    {
       title: "Opponent Score",
       dataIndex: "opponentScore",
       key: "opponentScore",
+      render: (_, item) => (
+        <Tag key={item.key} color={item.score < item.opponentScore ? "green-inverse" : "red-inverse"}>{item.opponentScore}</Tag>
+      )
     },
     {
       title: "Opponent Army",
@@ -92,8 +114,8 @@ export default function Standings({ data, matchesByPlayer }) {
         <h2>Standings</h2>
         <Table
           pagination={false}
-          columns={columnsStandings}
-          dataSource={data}
+          columns={standingsColumns}
+          dataSource={standings}
         />
       </div>
 
@@ -102,7 +124,7 @@ export default function Standings({ data, matchesByPlayer }) {
           <h2>Player Matches: {focusPlayer}</h2>
           <Table
             pagination={false}
-            columns={columnMatches}
+            columns={matchesColumns}
             dataSource={playerMatches}
           />
         </div>

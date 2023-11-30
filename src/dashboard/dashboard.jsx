@@ -2,7 +2,7 @@ import { Button, Table } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import React, { useState, useEffect } from "react";
 import { v4 as uuid } from "uuid";
-import Standings from "./standings";
+import StandingsTable from "./standingsTable";
 import MatchImporter from "../services/MatchImporter";
 import ValidationTable from "./validationTable";
 
@@ -30,6 +30,7 @@ export default function Dashboard() {
   };
 
   const handleImportMatches = () => {
+    console.info(MatchImporter.ParsePlayers(playerData));
     setPlayers(MatchImporter.ParsePlayers(playerData));
     setMatches(MatchImporter.ParseMatches(matchData));
     setDisplay(Display.Validation);
@@ -236,7 +237,7 @@ export default function Dashboard() {
         </>
       )}
       {display === Display.Standings && (
-        <Standings data={_standings} matchesByPlayer={matchesByPlayer} />
+        <StandingsTable standings={_standings} matchesByPlayer={matchesByPlayer} />
       )}
     </>
   );
