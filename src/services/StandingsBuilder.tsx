@@ -71,7 +71,7 @@ interface WeeklyMatchesByPlayer {
   [key: string]: WeeklyMatch[];
 }
 
-const getLeagueWeek = (startDate, endDate, matchDate) => {
+const getLeagueWeek = (startDate: string, endDate: string, matchDate: string) => {
   const _startDate = dayjs(startDate);
   const _endDate = dayjs(endDate);
   const _matchDate = dayjs(matchDate);
@@ -112,7 +112,7 @@ const getLeagueWeek = (startDate, endDate, matchDate) => {
   return matchWeek;
 };
 
-const calcLeagueScore = (playerScore, opponentScore) => {
+const calcLeagueScore = (playerScore: string, opponentScore: string) => {
   return parseFloat(playerScore) + (100 - parseFloat(opponentScore));
 };
 
@@ -224,7 +224,7 @@ const determineTop4Matches = (
   return { ...new_standing, leagueScore: leagueScore };
 };
 
-const buildStandings = (players: Player[], matches: Match[]) => {
+const build = (players: Player[], matches: Match[]) => {
   const leagueStartDate = "11/19/2023";
   const leagueEndDate = "3/31/2024";
 
@@ -239,7 +239,7 @@ const buildStandings = (players: Player[], matches: Match[]) => {
   const finalLeagueWeek =
     getLeagueWeek(leagueStartDate, leagueEndDate, leagueEndDate) + 1;
 
-  for (let week = 1; week < finalLeagueWeek; week++) {
+  for (let week = 1; week < finalLeagueWeek + 1; week++) {
     let matchesForCurrentWeek = matchesByWeek[week];
     let standingsForPriorWeek =
       week > 1 ? playerStandingByWeek[week - 1] : undefined;
@@ -301,6 +301,10 @@ const buildStandings = (players: Player[], matches: Match[]) => {
         return 0;
       }
     );
+
+    for (let item = 0; item < leagueStandingsByWeek[week].length; item++) {
+      leagueStandingsByWeek[week][item].rank = item + 1;
+    }
   } // by week
 
   return { leagueStandingsByWeek, totalWeeksInSeason: finalLeagueWeek };
@@ -581,10 +585,10 @@ const buildStandings = (players: Player[], matches: Match[]) => {
 // const standings = buildStandings(players, matches);
 
 // console.info(standings[20]);
-  
+
 
 const StandingsBuilder = {
-  BuildStandings: buildStandings,
+  Build: build,
 };
 
 export default StandingsBuilder;
