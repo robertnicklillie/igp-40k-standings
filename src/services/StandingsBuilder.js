@@ -89,8 +89,6 @@ var groupMatchesIntoLeagueWeeks = function (matches, leagueStartDate, leagueEndD
     }
     return weeklyMatches;
 };
-// const { match1: WeeklyMatch | undefined, match2: WeeklyMatch | undefined, match3: WeeklyMatch | undefined, match4: WeeklyMatch | undefined} =
-//     getTop4MatchesForPlayer(matchesForCurrentWeek[player.name], standingsForPriorWeek[player.name]);
 var determineTop4Matches = function (matches, standing) {
     var allMatches = __spreadArray([], matches, true);
     if (standing === null || standing === void 0 ? void 0 : standing.match1)
@@ -103,9 +101,9 @@ var determineTop4Matches = function (matches, standing) {
         allMatches.push(standing.match4);
     var sortedMatches = allMatches.sort(function (a, b) {
         if (a.leagueScore < b.leagueScore)
-            return -1;
-        if (a.leagueScore > b.leagueScore)
             return 1;
+        if (a.leagueScore > b.leagueScore)
+            return -1;
         return 0;
     });
     var new_standing = {
@@ -137,39 +135,59 @@ var determineTop4Matches = function (matches, standing) {
     return __assign(__assign({}, new_standing), { leagueScore: leagueScore });
 };
 var buildStandings = function (players, matches) {
+    var _a;
     var leagueStartDate = "11/19/2023";
     var leagueEndDate = "3/31/2024";
     var matchesByWeek = groupMatchesIntoLeagueWeeks(matches, leagueStartDate, leagueEndDate);
-    var standingsByWeek = {};
+    var playerStandingByWeek = {};
+    var leagueStandingsByWeek = {};
     var finalLeagueWeek = getLeagueWeek(leagueStartDate, leagueEndDate, leagueEndDate) + 1;
     for (var week = 1; week < finalLeagueWeek; week++) {
         var matchesForCurrentWeek = matchesByWeek[week];
-        var standingsForPriorWeek = week > 1 ? standingsByWeek[week - 1] : undefined;
-        console.info(standingsForPriorWeek);
+        var standingsForPriorWeek = week > 1 ? playerStandingByWeek[week - 1] : undefined;
         // if there are no matches this week, just copy the prior week's standings
         if (week > 1 && !matchesForCurrentWeek && standingsForPriorWeek) {
-            standingsByWeek[week] = standingsForPriorWeek;
+            playerStandingByWeek[week] = standingsForPriorWeek;
+            leagueStandingsByWeek[week] = [];
+            for (var standing in standingsForPriorWeek) {
+                leagueStandingsByWeek[week].push(standingsForPriorWeek[standing]);
+            }
         }
         else {
-            for (var index = 1; index < players.length; index++) {
+            for (var index = 0; index < players.length; index++) {
                 var player = players[index];
                 var playerStanding = {
                     player: player.name,
                     army: player.army,
                     avgLeagueScore: 0.0,
                 };
+                var priorPlayerStanding = week > 1 && (standingsForPriorWeek === null || standingsForPriorWeek === void 0 ? void 0 : standingsForPriorWeek.hasOwnProperty(player.name))
+                    ? standingsForPriorWeek[player.name]
+                    : null;
                 if (matchesForCurrentWeek.hasOwnProperty(player.name)) {
-                    var priorPlayerStanding = undefined;
-                    if (standingsForPriorWeek)
-                        priorPlayerStanding = standingsForPriorWeek[player.name];
-                    var _a = determineTop4Matches(matchesForCurrentWeek[player.name], priorPlayerStanding), match1 = _a.match1, match2 = _a.match2, match3 = _a.match3, match4 = _a.match4, leagueScore = _a.leagueScore;
+                    var _b = determineTop4Matches(matchesForCurrentWeek[player.name], priorPlayerStanding), match1 = _b.match1, match2 = _b.match2, match3 = _b.match3, match4 = _b.match4, leagueScore = _b.leagueScore;
                     playerStanding = __assign(__assign({}, playerStanding), { match1: match1, match2: match2, match3: match3, match4: match4, avgLeagueScore: leagueScore });
                 }
-                standingsByWeek[week][player.name] = playerStanding;
-            }
+                else if (priorPlayerStanding) {
+                    playerStanding = priorPlayerStanding;
+                }
+                if (!playerStandingByWeek[week])
+                    playerStandingByWeek[week] = {};
+                playerStandingByWeek[week][player.name] = playerStanding;
+                if (!leagueStandingsByWeek[week])
+                    leagueStandingsByWeek[week] = [];
+                leagueStandingsByWeek[week].push(playerStanding);
+            } // by player
         }
-    }
-    return standingsByWeek;
+        leagueStandingsByWeek[week] = (_a = leagueStandingsByWeek[week]) === null || _a === void 0 ? void 0 : _a.sort(function (a, b) {
+            if (a.avgLeagueScore < b.avgLeagueScore)
+                return 1;
+            if (a.avgLeagueScore > b.avgLeagueScore)
+                return -1;
+            return 0;
+        });
+    } // by week
+    return leagueStandingsByWeek;
 };
 var matches = [
     {
@@ -441,7 +459,8 @@ var players = [
         isActive: true,
     },
 ];
-console.info(buildStandings(players, matches));
+var standings = buildStandings(players, matches);
+console.info(standings[20]);
 // const StandingsBuilder = {
 //   BuildStandings: buildStandings,
 // };
