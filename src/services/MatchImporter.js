@@ -28,7 +28,7 @@ const armyHashMap = {
   Salamanders: {},
   "Space Marines": {},
   "Space Wolves": {},
-  Tau: {},
+  "Tau Empire": {},
   "Thousand Sons": {},
   Tyranids: {},
   Ultramarines: {},
