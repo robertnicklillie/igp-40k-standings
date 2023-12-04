@@ -135,12 +135,12 @@ const calcLeagueScore = (playerScore: string, opponentScore: string) => {
   return parseFloat(playerScore) + (100 - parseFloat(opponentScore));
 };
 
-const groupMatchesIntoLeagueWeeks = (
+const groupMatches = (
   matches: Match[],
   leagueStartDate: string,
   leagueEndDate: string
 ) => {
-  let weeklyMatches: LeagueMatchesByWeek = {};
+  let matchesByWeek: LeagueMatchesByWeek = {};
 
   for (let i = 0; i < matches.length; i++) {
     let match = matches[i];
@@ -151,15 +151,15 @@ const groupMatchesIntoLeagueWeeks = (
       match.date
     ).week;
 
-    if (!weeklyMatches.hasOwnProperty(leagueWeek)) {
-      weeklyMatches[leagueWeek] = {};
+    if (!matchesByWeek.hasOwnProperty(leagueWeek)) {
+      matchesByWeek[leagueWeek] = {};
     }
 
-    if (!weeklyMatches[leagueWeek].hasOwnProperty(match.player1)) {
-      weeklyMatches[leagueWeek][match.player1] = [];
+    if (!matchesByWeek[leagueWeek].hasOwnProperty(match.player1)) {
+      matchesByWeek[leagueWeek][match.player1] = [];
     }
 
-    weeklyMatches[leagueWeek][match.player1].push({
+    matchesByWeek[leagueWeek][match.player1].push({
       key: uuid(),
       date: match.date,
       isMatchEligible: true,
@@ -171,11 +171,11 @@ const groupMatchesIntoLeagueWeeks = (
       opponentScore: parseFloat(match.player2Score),
     });
 
-    if (!weeklyMatches[leagueWeek].hasOwnProperty(match.player2)) {
-      weeklyMatches[leagueWeek][match.player2] = [];
+    if (!matchesByWeek[leagueWeek].hasOwnProperty(match.player2)) {
+      matchesByWeek[leagueWeek][match.player2] = [];
     }
 
-    weeklyMatches[leagueWeek][match.player2].push({
+    matchesByWeek[leagueWeek][match.player2].push({
       key: uuid(),
       date: match.date,
       isMatchEligible: true,
@@ -188,7 +188,7 @@ const groupMatchesIntoLeagueWeeks = (
     });
   }
 
-  return weeklyMatches;
+  return matchesByWeek;
 };
 
 const determineTop4Matches = (
@@ -222,29 +222,59 @@ const determineTop4Matches = (
   };
 
   const totalMatches = sortedMatches.length;
-
+  let totalTop4 = 0;
   let totalLeagueScore = 0.0;
+  
+  let nextMatch: WeeklyMatch | null = null;
+  let matchIndex = 0;
+  const excludedOpponents: {[key: string]: number} = {};
+
+  const findNextMatch = (sortedMatches: WeeklyMatch[], matchIndex: number, excludedOpponents:{[key: string]: number} ) => {
+    if (matchIndex < sortedMatches.length) {
+      for (;matchIndex < sortedMatches.length; matchIndex++){
+        if (!excludedOpponents.hasOwnProperty(sortedMatches[matchIndex].opponent)){
+          return sortedMatches[matchIndex];
+        } else {
+          sortedMatches[matchIndex].isMatchEligible = false;
+        }
+      }
+    }
+    return null;
+  };
+  
   if (totalMatches > 0) {
-    new_standing.match1 = sortedMatches[0];
+    new_standing.match1 = sortedMatches[matchIndex++];
     totalLeagueScore += new_standing.match1.leagueScore;
+    excludedOpponents[new_standing.match1.opponent] = 0;
+    totalTop4++;
   }
-  if (totalMatches > 1) {
-    new_standing.match2 = sortedMatches[1];
+  nextMatch = findNextMatch(sortedMatches, matchIndex, excludedOpponents);
+  if (nextMatch) {
+    new_standing.match2 = nextMatch;
     totalLeagueScore += new_standing.match2.leagueScore;
+    excludedOpponents[new_standing.match2.opponent] = 0;
+    totalTop4++;
   }
-  if (totalMatches > 2) {
-    new_standing.match3 = sortedMatches[2];
+  
+  nextMatch = findNextMatch(sortedMatches, matchIndex, excludedOpponents);
+  if (nextMatch) {
+    new_standing.match3 = nextMatch;
     totalLeagueScore += new_standing.match3.leagueScore;
+    excludedOpponents[new_standing.match3.opponent] = 0;
+    totalTop4++;
   }
-  if (totalMatches > 3) {
-    new_standing.match4 = sortedMatches[3];
+  nextMatch = findNextMatch(sortedMatches, matchIndex, excludedOpponents);
+  if (nextMatch) {
+    new_standing.match4 = nextMatch;
     totalLeagueScore += new_standing.match4.leagueScore;
+    excludedOpponents[new_standing.match4.opponent] = 0;
+    totalTop4++;
   }
 
   const leagueScore =
-    totalMatches > 0 ? totalLeagueScore / Math.min(totalMatches, 4) : 0.0;
+  totalTop4 > 0 ? totalLeagueScore / totalTop4 : 0.0;
 
-  return { ...new_standing, leagueScore: leagueScore };
+  return { ...new_standing, leagueScore: leagueScore, match: sortedMatches };
 };
 
 const build = (
@@ -253,7 +283,7 @@ const build = (
   leagueStartDate: string,
   leagueEndDate: string
 ) => {
-  const matchesByWeek = groupMatchesIntoLeagueWeeks(
+  const matchesByWeek = groupMatches(
     matches,
     leagueStartDate,
     leagueEndDate
