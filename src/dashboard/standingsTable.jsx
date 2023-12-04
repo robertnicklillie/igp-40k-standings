@@ -11,12 +11,12 @@ export default function StandingsTable({
 
   const generateMatchShorthand = (match) => {
     if (match) {
-      const matchScoreLine = `${
-        match.matchScore > match.opponentScore ? "W" : "L"
-      } ${match.matchScore} - ${match.opponentScore}`;
+      const playerScoreLine = `${
+        match.playerScore > match.opponentScore ? "W" : "L"
+      } ${match.playerScore} - ${match.opponentScore}`;
       return (
         <>
-          <b>{match.leagueScore}</b>&nbsp;--&nbsp;{matchScoreLine} vs{" "}
+          <b>{match.leagueScore}</b>&nbsp;--&nbsp;{playerScoreLine} vs{" "}
           <b>{match.opponent}</b> [{match.opponentArmy}]
         </>
       );
