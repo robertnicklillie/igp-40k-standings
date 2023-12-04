@@ -16,8 +16,8 @@ export default function StandingsTable({
       } ${match.matchScore} - ${match.opponentScore}`;
       return (
         <>
-          <b>{match.leagueScore}</b>&nbsp;--&nbsp;{matchScoreLine} vs <b>{match.opponent}</b> [
-          {match.opponentArmy}]
+          <b>{match.leagueScore}</b>&nbsp;--&nbsp;{matchScoreLine} vs{" "}
+          <b>{match.opponent}</b> [{match.opponentArmy}]
         </>
       );
     }
@@ -30,7 +30,7 @@ export default function StandingsTable({
       title: "Rank",
       dataIndex: "rank",
       key: "rank",
-      render: (rank) => <h2>{rank ?? "NR"}</h2>,
+      render: (rank) => <span style={{ fontSize: "18px", fontWeight: "bold" }}>{rank ?? "NR"}</span>,
     },
     {
       title: "League Score",
@@ -153,10 +153,9 @@ export default function StandingsTable({
   return (
     <>
       <div>
-        <h1>Standings</h1>
+        <h1>Standings - Week {leagueWeek.week}</h1>
         <h3>
-          For week #{leagueWeek.week} of {standings.totalWeeksInSeason},
-          starting {leagueWeek.firstDay}
+          As of week ending {new Date().toLocaleDateString()}
         </h3>
         <Table
           pagination={false}

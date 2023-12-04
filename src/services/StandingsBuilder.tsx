@@ -78,8 +78,7 @@ interface WeeklyMatchesByPlayer {
 const getLeagueWeek = (
   startDate: string,
   endDate: string,
-  matchDate: string,
-  includeFirstDayOfWeek: boolean = false
+  matchDate: string
 ) => {
   const _startDate = dayjs(startDate);
   const _endDate = dayjs(endDate);
@@ -105,8 +104,11 @@ const getLeagueWeek = (
   const weekOneYear = _startDate.year();
   let week = 0;
 
+  // moving sunday and monday to the prior week
+  const isSundayOrMonday = _matchDate.day() === 0 || _matchDate.day() === 1;
+
   if (_matchDate.year() === weekOneYear) {
-    week = _matchDate.week() - weekOne + 1;
+    week = _matchDate.week() - weekOne + (isSundayOrMonday ? 0 : 1);
   } else {
     // get the final week of the year
     let finalWeek = 0;
@@ -115,17 +117,8 @@ const getLeagueWeek = (
       finalWeek = dayjs(`12/${dayFinalWeek--}/${weekOneYear}`).week();
     } while (finalWeek < 51);
 
-    const yearWeekOffset = finalWeek - weekOne + 1;
-    week = _matchDate.week() + yearWeekOffset;
-  }
-
-  if (includeFirstDayOfWeek) {
-    return {
-      week,
-      firstDay: new Date(
-        dayjs(_matchDate).day(0).toDate()
-      ).toLocaleDateString(),
-    };
+    const yearWeekOffset = finalWeek - weekOne;
+    week = _matchDate.week() + yearWeekOffset + (isSundayOrMonday ? 0 : 1);
   }
 
   return { week };
@@ -191,15 +184,30 @@ const groupMatches = (
   return matchesByWeek;
 };
 
-const determineTop4Matches = (
-  matches: WeeklyMatch[],
-  standing?: PlayerStanding | null
+const getPlayerStanding = (
+  standingsByPlayer: StandingsByPlayer | undefined,
+  playerName: string
 ) => {
-  const allMatches = [...matches];
-  if (standing?.match1) allMatches.push(standing.match1);
-  if (standing?.match2) allMatches.push(standing.match2);
-  if (standing?.match3) allMatches.push(standing.match3);
-  if (standing?.match4) allMatches.push(standing.match4);
+  return standingsByPlayer?.hasOwnProperty(playerName)
+    ? standingsByPlayer[playerName]
+    : null;
+};
+
+const determineTop4Matches = (
+  playerName: string,
+  matchesForPlayer: WeeklyMatch[],
+  standingsByPlayer?: StandingsByPlayer
+) => {
+  let playerStanding: PlayerStanding | null = getPlayerStanding(
+    standingsByPlayer,
+    playerName
+  );
+
+  const allMatches = [...matchesForPlayer];
+  if (playerStanding?.match1) allMatches.push(playerStanding.match1);
+  if (playerStanding?.match2) allMatches.push(playerStanding.match2);
+  if (playerStanding?.match3) allMatches.push(playerStanding.match3);
+  if (playerStanding?.match4) allMatches.push(playerStanding.match4);
 
   const sortedMatches = allMatches.sort((a: WeeklyMatch, b: WeeklyMatch) => {
     if (a.leagueScore < b.leagueScore) return 1;
@@ -221,58 +229,101 @@ const determineTop4Matches = (
     leagueScore: 0.0,
   };
 
-  const totalMatches = sortedMatches.length;
   let totalTop4 = 0;
   let totalLeagueScore = 0.0;
-  
+
   let nextMatch: WeeklyMatch | null = null;
   let matchIndex = 0;
-  const excludedOpponents: {[key: string]: number} = {};
+  const alreadyScoredOpponents: { [key: string]: number } = {};
 
-  const findNextMatch = (sortedMatches: WeeklyMatch[], matchIndex: number, excludedOpponents:{[key: string]: number} ) => {
+  const findNextMatch = (
+    sortedMatches: WeeklyMatch[],
+    matchIndex: number,
+    alreadyScoredOpponents: { [key: string]: number },
+    playerCurrentRank: number | null
+  ) => {
+    
     if (matchIndex < sortedMatches.length) {
-      for (;matchIndex < sortedMatches.length; matchIndex++){
-        if (!excludedOpponents.hasOwnProperty(sortedMatches[matchIndex].opponent)){
-          return sortedMatches[matchIndex];
-        } else {
+      for (; matchIndex < sortedMatches.length; matchIndex++) {
+        const opponentPlayerRank = getPlayerStanding(
+          standingsByPlayer,
+          sortedMatches[matchIndex].opponent
+        );
+
+        if (
+          alreadyScoredOpponents.hasOwnProperty(
+            sortedMatches[matchIndex].opponent
+          ) ||
+          (playerCurrentRank &&
+            opponentPlayerRank &&
+            opponentPlayerRank.rank &&
+            opponentPlayerRank?.rank - playerCurrentRank > 5)
+        ) {
+          console.info(sortedMatches);
+          console.info(playerCurrentRank);
+          console.info(opponentPlayerRank);
+          
+
           sortedMatches[matchIndex].isMatchEligible = false;
+        } else {
+          return sortedMatches[matchIndex];
         }
       }
     }
     return null;
   };
-  
-  if (totalMatches > 0) {
+
+  nextMatch = findNextMatch(
+    sortedMatches,
+    matchIndex,
+    alreadyScoredOpponents,
+    playerStanding?.rank ?? null
+  );
+  if (nextMatch) {
     new_standing.match1 = sortedMatches[matchIndex++];
     totalLeagueScore += new_standing.match1.leagueScore;
-    excludedOpponents[new_standing.match1.opponent] = 0;
+    alreadyScoredOpponents[new_standing.match1.opponent] = 0;
     totalTop4++;
   }
-  nextMatch = findNextMatch(sortedMatches, matchIndex, excludedOpponents);
+  nextMatch = findNextMatch(
+    sortedMatches,
+    matchIndex,
+    alreadyScoredOpponents,
+    playerStanding?.rank ?? null
+  );
   if (nextMatch) {
     new_standing.match2 = nextMatch;
     totalLeagueScore += new_standing.match2.leagueScore;
-    excludedOpponents[new_standing.match2.opponent] = 0;
-    totalTop4++;
-  }
-  
-  nextMatch = findNextMatch(sortedMatches, matchIndex, excludedOpponents);
-  if (nextMatch) {
-    new_standing.match3 = nextMatch;
-    totalLeagueScore += new_standing.match3.leagueScore;
-    excludedOpponents[new_standing.match3.opponent] = 0;
-    totalTop4++;
-  }
-  nextMatch = findNextMatch(sortedMatches, matchIndex, excludedOpponents);
-  if (nextMatch) {
-    new_standing.match4 = nextMatch;
-    totalLeagueScore += new_standing.match4.leagueScore;
-    excludedOpponents[new_standing.match4.opponent] = 0;
+    alreadyScoredOpponents[new_standing.match2.opponent] = 0;
     totalTop4++;
   }
 
-  const leagueScore =
-  totalTop4 > 0 ? totalLeagueScore / totalTop4 : 0.0;
+  nextMatch = findNextMatch(
+    sortedMatches,
+    matchIndex,
+    alreadyScoredOpponents,
+    playerStanding?.rank ?? null
+  );
+  if (nextMatch) {
+    new_standing.match3 = nextMatch;
+    totalLeagueScore += new_standing.match3.leagueScore;
+    alreadyScoredOpponents[new_standing.match3.opponent] = 0;
+    totalTop4++;
+  }
+  nextMatch = findNextMatch(
+    sortedMatches,
+    matchIndex,
+    alreadyScoredOpponents,
+    playerStanding?.rank ?? null
+  );
+  if (nextMatch) {
+    new_standing.match4 = nextMatch;
+    totalLeagueScore += new_standing.match4.leagueScore;
+    alreadyScoredOpponents[new_standing.match4.opponent] = 0;
+    totalTop4++;
+  }
+
+  const leagueScore = totalTop4 > 0 ? totalLeagueScore / totalTop4 : 0.0;
 
   return { ...new_standing, leagueScore: leagueScore, match: sortedMatches };
 };
@@ -283,11 +334,7 @@ const build = (
   leagueStartDate: string,
   leagueEndDate: string
 ) => {
-  const matchesByWeek = groupMatches(
-    matches,
-    leagueStartDate,
-    leagueEndDate
-  );
+  const matchesByWeek = groupMatches(matches, leagueStartDate, leagueEndDate);
 
   const playerStandingByWeek: StandingsByWeek = {};
   const leagueStandingsByWeek: LeagueStandingsByWeek = {};
@@ -296,6 +343,7 @@ const build = (
     getLeagueWeek(leagueStartDate, leagueEndDate, leagueEndDate).week + 1;
 
   for (let week = 1; week < finalLeagueWeek + 1; week++) {
+    console.info("week: " + week);
     let matchesForCurrentWeek = matchesByWeek[week];
     let standingsForPriorWeek =
       week > 1 ? playerStandingByWeek[week - 1] : undefined;
@@ -315,6 +363,8 @@ const build = (
         // (because they have no new matches) or if we need to recalc their top 4
         let player = players[index];
 
+        console.info("player: " + player.name);
+
         let playerStanding: PlayerStanding = {
           key: uuid(),
           player: player.name,
@@ -322,10 +372,14 @@ const build = (
           avgLeagueScore: 0.0,
         };
 
-        let priorPlayerStanding: PlayerStanding | null =
-          week > 1 && standingsForPriorWeek?.hasOwnProperty(player.name)
-            ? standingsForPriorWeek[player.name]
-            : null;
+        let priorPlayerStanding: PlayerStanding | null = getPlayerStanding(
+          standingsForPriorWeek,
+          player.name
+        );
+
+        // week > 1 && standingsForPriorWeek?.hasOwnProperty(player.name)
+        //   ? standingsForPriorWeek[player.name]
+        //   : null;
 
         if (
           matchesForCurrentWeek &&
@@ -333,8 +387,9 @@ const build = (
         ) {
           const { match1, match2, match3, match4, leagueScore } =
             determineTop4Matches(
+              player.name,
               matchesForCurrentWeek[player.name],
-              priorPlayerStanding
+              standingsForPriorWeek
             );
 
           playerStanding = {
@@ -365,10 +420,22 @@ const build = (
       }
     );
 
-    for (let item = 0; item < leagueStandingsByWeek[week].length; item++) {
-      if (leagueStandingsByWeek[week][item].avgLeagueScore > 0) {
-        leagueStandingsByWeek[week][item].rank = item + 1;
+    let priorRankPlayerScore = 0.0;
+    let deferRank = 1;
+    for (
+      let playerRank = 0;
+      playerRank < leagueStandingsByWeek[week].length;
+      playerRank++
+    ) {
+      const player = leagueStandingsByWeek[week][playerRank];
+
+      if (player.avgLeagueScore === priorRankPlayerScore) {
+        player.rank = playerRank + 1 - deferRank++;
+      } else {
+        player.rank = playerRank + 1;
+        deferRank = 1;
       }
+      priorRankPlayerScore = player.avgLeagueScore;
     }
   } // by week
 
@@ -380,7 +447,7 @@ const getCurrentLeagueWeekFor = (
   leagueStartDate: string,
   leagueEndDate: string
 ) => {
-  return getLeagueWeek(leagueStartDate, leagueEndDate, targetDate, true);
+  return getLeagueWeek(leagueStartDate, leagueEndDate, targetDate);
 };
 
 const StandingsBuilder = {
