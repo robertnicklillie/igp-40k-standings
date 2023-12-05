@@ -87,12 +87,12 @@ export default function Dashboard() {
       )}
       {display === Display.Validation && (
         <>
-          <ValidationTable players={players} matches={matches} />
-          <div style={{ paddingTop: "20px" }}>
+        <div style={{ paddingBottom: "20px" }}>
             <Button type="primary" onClick={handleGenerateStandings}>
               Generate Standings
             </Button>
           </div>
+          <ValidationTable players={players} matches={matches} />
         </>
       )}
       {display === Display.Standings && (
