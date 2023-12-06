@@ -132,12 +132,16 @@ export default function StandingsTable({ leagueWeek, standings, matchesByPlayer 
         return standings.leagueStandingsByWeek[standings.totalWeeksInSeason];
     };
 
+    const removeFocusPlayer = () => {
+        setFocusPlayer(null)
+    }
+
     useEffect(() => {
         const matchesForPlayer = matchesByPlayer[focusPlayer];
-
-        setPlayerStandings(
-            standings.leagueStandingsByWeek[standings.totalWeeksInSeason].filter((s) => s.player === focusPlayer)
+        const playerStandings = standings.leagueStandingsByWeek[standings.totalWeeksInSeason].filter(
+            (s) => s.player === focusPlayer
         );
+        setPlayerStandings(playerStandings);
         setPlayerMatches(matchesForPlayer);
     }, [focusPlayer, matchesByPlayer, standings.leagueStandingsByWeek, standings.totalWeeksInSeason]);
 
@@ -150,8 +154,7 @@ export default function StandingsTable({ leagueWeek, standings, matchesByPlayer 
 
             {focusPlayer && (
                 <div>
-                    <h2>Player Matches: {focusPlayer}</h2>
-                    <CloseCircleTwoTone onClick={setFocusPlayer(null)} />
+                    <h2>Player Matches: {focusPlayer} <CloseCircleTwoTone onClick={removeFocusPlayer} /></h2>
                     <Table pagination={false} columns={matchesColumns} dataSource={playerMatches} />
                 </div>
             )}
