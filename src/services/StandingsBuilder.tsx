@@ -193,14 +193,15 @@ const isMatchEligible = (
     opponentStanding: PlayerStanding | null
 ) => {
     const priorOpponent = priorOpponents.hasOwnProperty(match.opponent);
-    const isOutOfRank =
-        match.leagueWeek === currentWeek &&
-        playerStanding &&
-        playerStanding.rank &&
-        opponentStanding &&
-        opponentStanding.rank &&
-        opponentStanding?.rank - playerStanding?.rank > 5;
+
+    const playerRank = playerStanding?.rank;
+    const opponentRank = opponentStanding?.rank;
+    const isOutOfRank = match.leagueWeek === currentWeek && playerRank && opponentRank && opponentRank - playerRank > 5;
+    match.playerRank = playerRank ?? 1;
+    match.opponentRank = opponentRank ?? 1;
+
     const isPlayersChosenArmy = match.playerArmy === playerArmy;
+
     return !priorOpponent && !isOutOfRank && isPlayersChosenArmy;
 };
 
@@ -296,21 +297,22 @@ const determineTop4Matches = (
         totalTop4++;
     }
 
-    console.info(new_standing);
-    console.info(sortedMatches);
-
-    return { ...new_standing, leagueScore: totalTop4 > 0 ? totalLeagueScore / totalTop4 : 0.0, match: sortedMatches };
+    return {
+        ...new_standing,
+        leagueScore: totalTop4 > 0 ? totalLeagueScore / totalTop4 : 0.0,
+        matches: [...sortedMatches.filter((m) => m.leagueWeek === currentWeek)],
+    };
 };
 
 const build = (players: Player[], matches: Match[], leagueStartDate: string, leagueEndDate: string) => {
     const playerStandingByWeek: StandingsByWeek = {};
     const leagueStandingsByWeek: LeagueStandingsByWeek = {};
+    const matchesByPlayer: WeeklyMatchesByPlayer = {};
 
     const matchesByWeek = groupMatchesByWeek(matches, leagueStartDate, leagueEndDate);
     const finalLeagueWeek = getLeagueWeek(leagueStartDate, leagueEndDate, leagueEndDate).week + 1;
 
     for (let week = 1; week < finalLeagueWeek + 1; week++) {
-        console.info("=================================== WEEK: " + week);
         let matchesForCurrentWeek = matchesByWeek[week];
         let standingsForPriorWeek = week > 1 ? playerStandingByWeek[week - 1] : undefined;
 
@@ -329,8 +331,6 @@ const build = (players: Player[], matches: Match[], leagueStartDate: string, lea
                 // (because they have no new matches) or if we need to recalc their top 4
                 let player = players[index];
 
-                console.info("\t----------player: " + player.name);
-
                 let playerStanding: PlayerStanding = {
                     key: uuid(),
                     player: player.name,
@@ -341,7 +341,7 @@ const build = (players: Player[], matches: Match[], leagueStartDate: string, lea
                 let priorPlayerStanding: PlayerStanding | null = getPlayerStanding(standingsForPriorWeek, player.name);
 
                 if (matchesForCurrentWeek && matchesForCurrentWeek.hasOwnProperty(player.name)) {
-                    const { match1, match2, match3, match4, leagueScore } = determineTop4Matches(
+                    const { match1, match2, match3, match4, leagueScore, matches } = determineTop4Matches(
                         week,
                         player,
                         matchesForCurrentWeek[player.name],
@@ -356,6 +356,9 @@ const build = (players: Player[], matches: Match[], leagueStartDate: string, lea
                         match4,
                         avgLeagueScore: leagueScore,
                     };
+
+                    if (!matchesByPlayer.hasOwnProperty(player.name)) matchesByPlayer[player.name] = [];
+                    matchesByPlayer[player.name] = [...matchesByPlayer[player.name], ...matches];
                 } else if (priorPlayerStanding) {
                     playerStanding = priorPlayerStanding;
                 }
@@ -389,7 +392,7 @@ const build = (players: Player[], matches: Match[], leagueStartDate: string, lea
         }
     } // by week
 
-    return { leagueStandingsByWeek, totalWeeksInSeason: finalLeagueWeek };
+    return { leagueStandingsByWeek, totalWeeksInSeason: finalLeagueWeek, matchesByPlayer };
 };
 
 const getCurrentLeagueWeekFor = (targetDate: string, leagueStartDate: string, leagueEndDate: string) => {

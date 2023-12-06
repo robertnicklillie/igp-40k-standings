@@ -1,9 +1,11 @@
 import { Button, Table, Tag } from "antd";
 import React, { useState, useEffect } from "react";
+import { FireTwoTone } from "@ant-design/icons";
 
 export default function StandingsTable({ leagueWeek, standings, matchesByPlayer }) {
     const [focusPlayer, setFocusPlayer] = useState(null);
     const [playerMatches, setPlayerMatches] = useState({ matches: [] });
+    const [playerStandings, setPlayerStandings] = useState(null);
 
     const generateMatchShorthand = (match) => {
         if (match) {
@@ -39,7 +41,7 @@ export default function StandingsTable({ leagueWeek, standings, matchesByPlayer 
             dataIndex: "player",
             key: "player",
             render: (_, match) => (
-                <Button type="link" onClick={() => setFocusPlayer(match.player)}>
+                <Button type="link" className="link-button" onClick={() => setFocusPlayer(match.player)}>
                     <b>{match.player}</b>
                 </Button>
             ),
@@ -78,53 +80,51 @@ export default function StandingsTable({ leagueWeek, standings, matchesByPlayer 
     const matchesColumns = [
         {
             title: "Date",
-            dataIndex: "matchDate",
-            key: "matchDate",
+            dataIndex: "date",
+            key: "date",
         },
         {
-            title: "League Week",
+            title: "Week",
             dataIndex: "leagueWeek",
             key: "leagueWeek",
         },
+
         {
-            title: "Rank",
-            dataIndex: "rank",
-            key: "rank",
-        },
-        {
-            title: "Player Score",
-            dataIndex: "score",
-            key: "score",
-            render: (_, item) => (
-                <Tag key={item.key} color={item.score > item.opponentScore ? "green-inverse" : "red-inverse"}>
-                    {item.score}
+            title: "Eligible?",
+            dataIndex: "isMatchEligible",
+            key: "isMatchEligible",
+            render: (item) => (
+                <Tag key={item} color={item === true ? "blue" : "red"}>
+                    {item ? "Yes" : "No"}
                 </Tag>
             ),
         },
         {
-            title: "Opponent",
-            dataIndex: "opponent",
-            key: "opponent",
+            title: "League Score",
+            dataIndex: "leagueScore",
+            key: "leagueScore",
+            render: (_, match) => {
+                const isTop4 =
+                    playerStandings[0]?.match1?.key === match.key ||
+                    playerStandings[0]?.match2?.key === match.key ||
+                    playerStandings[0]?.match3?.key === match.key ||
+                    playerStandings[0]?.match4?.key === match.key;
+
+                return (
+                    <>
+                        {isTop4 && <FireTwoTone />} {match.leagueScore}
+                    </>
+                );
+            },
         },
         {
-            title: "Opponent Rank",
-            dataIndex: "opponentRank",
-            key: "opponentRank",
+            title: "Player (army, rank, score)",
+            render: (_, match) => `${match.playerArmy} | ${match.playerRank} | ${match.playerScore}`,
         },
         {
-            title: "Opponent Score",
-            dataIndex: "opponentScore",
-            key: "opponentScore",
-            render: (_, item) => (
-                <Tag key={item.key} color={item.score < item.opponentScore ? "green-inverse" : "red-inverse"}>
-                    {item.opponentScore}
-                </Tag>
-            ),
-        },
-        {
-            title: "Opponent Army",
-            dataIndex: "opponentArmy",
-            key: "opponentArmy",
+            title: "Opponent (name, army, rank, score)",
+            render: (_, match) =>
+                `${match.opponent} | ${match.opponentArmy} | ${match.opponentRank} | ${match.opponentScore}`,
         },
     ];
 
@@ -132,21 +132,20 @@ export default function StandingsTable({ leagueWeek, standings, matchesByPlayer 
         return standings.leagueStandingsByWeek[standings.totalWeeksInSeason];
     };
 
-    // useEffect(() => {
-    //   setPlayerMatches(matchesByPlayer[focusPlayer]);
-    // }, [focusPlayer, matchesByPlayer]);
+    useEffect(() => {
+        const matchesForPlayer = matchesByPlayer[focusPlayer];
+
+        setPlayerStandings(
+            standings.leagueStandingsByWeek[standings.totalWeeksInSeason].filter((s) => s.player === focusPlayer)
+        );
+        setPlayerMatches(matchesForPlayer);
+    }, [focusPlayer, matchesByPlayer, standings.leagueStandingsByWeek, standings.totalWeeksInSeason]);
 
     return (
         <>
             <div>
                 <h1>Standings - Week {leagueWeek.week}</h1>
-                <h3>As of week ending {new Date().toLocaleDateString()}</h3>
-                <Table
-                    pagination={false}
-                    columns={standingsColumns}
-                    //leagueStandingsByWeek, totalWeeksInSeason
-                    dataSource={getStandings()}
-                />
+                <Table pagination={false} columns={standingsColumns} dataSource={getStandings()} />
             </div>
 
             {focusPlayer && (
