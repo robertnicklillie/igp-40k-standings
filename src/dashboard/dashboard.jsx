@@ -1,7 +1,6 @@
-import { Button, Table } from "antd";
+import { Button } from "antd";
 import TextArea from "antd/es/input/TextArea";
-import React, { useState, useEffect } from "react";
-import { v4 as uuid } from "uuid";
+import React, { useState } from "react";
 import StandingsTable from "./standingsTable";
 import MatchImporter from "../services/MatchImporter";
 import ValidationTable from "./validationTable";

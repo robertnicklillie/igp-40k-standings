@@ -1,6 +1,6 @@
 import { Button, Table, Tag } from "antd";
 import React, { useState, useEffect } from "react";
-import { FireTwoTone } from "@ant-design/icons";
+import { FireTwoTone, CloseCircleTwoTone } from "@ant-design/icons";
 
 export default function StandingsTable({ leagueWeek, standings, matchesByPlayer }) {
     const [focusPlayer, setFocusPlayer] = useState(null);
@@ -151,6 +151,7 @@ export default function StandingsTable({ leagueWeek, standings, matchesByPlayer 
             {focusPlayer && (
                 <div>
                     <h2>Player Matches: {focusPlayer}</h2>
+                    <CloseCircleTwoTone onClick={setFocusPlayer(null)} />
                     <Table pagination={false} columns={matchesColumns} dataSource={playerMatches} />
                 </div>
             )}
