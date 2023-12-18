@@ -51,6 +51,7 @@ interface PlayerStanding {
     army: string;
     avgLeagueScore: number;
     rank?: number;
+    totalMatches: number;
     match1?: WeeklyMatch;
     match2?: WeeklyMatch;
     match3?: WeeklyMatch;
@@ -336,6 +337,7 @@ const build = (players: Player[], matches: Match[], leagueStartDate: string, lea
                     player: player.name,
                     army: player.army,
                     avgLeagueScore: 0.0,
+                    totalMatches: 0,
                 };
 
                 let priorPlayerStanding: PlayerStanding | null = getPlayerStanding(standingsForPriorWeek, player.name);
@@ -359,6 +361,7 @@ const build = (players: Player[], matches: Match[], leagueStartDate: string, lea
 
                     if (!matchesByPlayer.hasOwnProperty(player.name)) matchesByPlayer[player.name] = [];
                     matchesByPlayer[player.name] = [...matchesByPlayer[player.name], ...matches];
+                    playerStanding.totalMatches = matchesByPlayer[player.name].length;
                 } else if (priorPlayerStanding) {
                     playerStanding = priorPlayerStanding;
                 }

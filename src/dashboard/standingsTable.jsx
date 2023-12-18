@@ -52,6 +52,11 @@ export default function StandingsTable({ leagueWeek, standings, matchesByPlayer 
             key: "army",
         },
         {
+          title: "Total Matches",
+          dataIndex: "totalMatches",
+          key: "totalMatches",
+        },
+        {
             title: "Match 1",
             dataIndex: "match1",
             key: "match1",
