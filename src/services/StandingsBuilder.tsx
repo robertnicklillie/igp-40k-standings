@@ -88,14 +88,7 @@ interface WeeklyMatchesByPlayer {
 
 const getLeagueWeek = (startDate: string, endDate: string, matchDate: string) => {
     const _startDate = dayjs(startDate);
-    const _endDate = dayjs(endDate);
     const _matchDate = dayjs(matchDate);
-
-    if (_matchDate.week() < _startDate.week() && _matchDate.year() === _startDate.year())
-        throw Error(`Match date ${_matchDate} cannot be before the league season start date ${_startDate}`);
-
-    if (_matchDate.week() > _endDate.week() && _matchDate.year() === _endDate.year())
-        throw Error(`Match date ${matchDate} cannot be after the league season end date ${endDate}`);
 
     const weekOne = _startDate.week();
     const weekOneYear = _startDate.year();
