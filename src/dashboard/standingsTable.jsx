@@ -28,7 +28,13 @@ export default function StandingsTable({ leagueWeek, standings, matchesByPlayer 
             title: "Rank",
             dataIndex: "rank",
             key: "rank",
-            render: (rank) => <span style={{ fontSize: "18px", fontWeight: "bold" }}>{rank ?? "NR"}</span>,
+            render: (rank) => <span style={{ fontSize: "24px", fontWeight: "bold", color: "#6b32a8" }}>{rank ?? "NR"}</span>,
+        },
+        {
+            title: "Champ Rank",
+            dataIndex: "rankPS",
+            key: "rankPS",
+            render: (rank) => <span style={{ fontSize: "24px", fontWeight: "bold", color: "#32a83a" }}>{rank ?? ""}</span>,
         },
         {
             title: "League Score",
@@ -56,6 +62,11 @@ export default function StandingsTable({ leagueWeek, standings, matchesByPlayer 
           dataIndex: "totalMatches",
           key: "totalMatches",
         },
+        {
+            title: "Out of Rank Matches",
+            dataIndex: "totalOORMatches",
+            key: "totalOORMatches",
+          },
         {
             title: "Match 1",
             dataIndex: "match1",
@@ -103,6 +114,10 @@ export default function StandingsTable({ leagueWeek, standings, matchesByPlayer 
                     {item ? "Yes" : "No"}
                 </Tag>
             ),
+        },        {
+            title: "Non-Eligible Reason",
+            dataIndex: "notEligibleReason",
+            key: "isMatchElnotEligibleReasonigible",
         },
         {
             title: "League Score",

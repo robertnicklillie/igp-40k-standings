@@ -34,6 +34,7 @@ interface WeeklyMatch {
     date: string;
     leagueWeek: number;
     isMatchEligible: boolean;
+    notEligibleReason: string;
     leagueScore: number;
     player: string;
     playerArmy: string;
@@ -51,7 +52,9 @@ interface PlayerStanding {
     army: string;
     avgLeagueScore: number;
     rank?: number;
+    rankPS?: number;
     totalMatches: number;
+    totalOORMatches: number;
     match1?: WeeklyMatch;
     match2?: WeeklyMatch;
     match3?: WeeklyMatch;
@@ -85,6 +88,12 @@ interface LeagueMatchesByWeek {
 interface WeeklyMatchesByPlayer {
     [key: string]: WeeklyMatch[];
 }
+
+const EligibilityReasons = {
+    PriorOpponent: "Better Qualifying Match",
+    OutOfRank: "Out Of Rank",
+    NotRegisteredArmy: "Not Registered Army",
+};
 
 const getLeagueWeek = (startDate: string, endDate: string, matchDate: string) => {
     const _startDate = dayjs(startDate);
@@ -139,6 +148,7 @@ const groupMatchesByWeek = (matches: Match[], leagueStartDate: string, leagueEnd
             date: match.date,
             leagueWeek: leagueWeek,
             isMatchEligible: true,
+            notEligibleReason: "",
             leagueScore: calcLeagueScore(match.player1Score, match.player2Score),
             player: match.player1,
             playerRank: 1,
@@ -159,6 +169,7 @@ const groupMatchesByWeek = (matches: Match[], leagueStartDate: string, leagueEnd
             date: match.date,
             leagueWeek: leagueWeek,
             isMatchEligible: true,
+            notEligibleReason: "",
             leagueScore: calcLeagueScore(match.player2Score, match.player1Score),
             player: match.player2,
             playerRank: 1,
@@ -175,7 +186,7 @@ const groupMatchesByWeek = (matches: Match[], leagueStartDate: string, leagueEnd
 };
 
 const getPlayerStanding = (standingsByPlayer: StandingsByPlayer | undefined, playerName: string) => {
-    return standingsByPlayer?.hasOwnProperty(playerName) ? standingsByPlayer[playerName] : null;
+    return standingsByPlayer?.hasOwnProperty(playerName) ? { ...standingsByPlayer[playerName] } : null;
 };
 
 const isMatchEligible = (
@@ -186,17 +197,26 @@ const isMatchEligible = (
     playerStanding: PlayerStanding | null,
     opponentStanding: PlayerStanding | null
 ) => {
-    const priorOpponent = priorOpponents.hasOwnProperty(match.opponent);
-
+    // player rank
     const playerRank = playerStanding?.rank;
     const opponentRank = opponentStanding?.rank;
-    const isOutOfRank = match.leagueWeek === currentWeek && playerRank && opponentRank && opponentRank - playerRank > 5;
-    match.playerRank = playerRank ?? 1;
-    match.opponentRank = opponentRank ?? 1;
+    if (match.leagueWeek === currentWeek && playerRank && opponentRank && opponentRank - playerRank > 5) {
+        match.playerRank = playerRank ?? 1;
+        match.opponentRank = opponentRank ?? 1;
+        return { yesNo: false, reason: EligibilityReasons.OutOfRank };
+    }
 
-    const isPlayersChosenArmy = match.playerArmy === playerArmy;
+    // prior opponent
+    if (priorOpponents.hasOwnProperty(match.opponent)) {
+        return { yesNo: false, reason: EligibilityReasons.PriorOpponent };
+    }
 
-    return !priorOpponent && !isOutOfRank && isPlayersChosenArmy;
+    // is registered army
+    if (match.playerArmy !== playerArmy) {
+        return { yesNo: false, reason: EligibilityReasons.NotRegisteredArmy };
+    }
+
+    return { yesNo: true, reason: "" };
 };
 
 const determineTop4Matches = (
@@ -243,19 +263,19 @@ const determineTop4Matches = (
             for (let index = matchIndex; index < sortedMatches.length; index++) {
                 let currentMatch = sortedMatches[index];
                 const opponentStanding = getPlayerStanding(standingsByPlayer, currentMatch.opponent);
-                if (
-                    isMatchEligible(
-                        currentMatch,
-                        priorOpponents,
-                        currentWeek,
-                        player.army,
-                        playerStanding,
-                        opponentStanding
-                    )
-                ) {
+                const eligibility = isMatchEligible(
+                    currentMatch,
+                    priorOpponents,
+                    currentWeek,
+                    player.army,
+                    playerStanding,
+                    opponentStanding
+                );
+                if (eligibility.yesNo) {
                     return { currentMatch, matchIndex: ++index };
                 } else {
                     currentMatch.isMatchEligible = false;
+                    currentMatch.notEligibleReason = eligibility.reason;
                 }
             }
         }
@@ -264,28 +284,28 @@ const determineTop4Matches = (
 
     let nextMatch = findNextMatch(currentWeek, sortedMatches, matchIndex, priorOpponents, playerStanding);
     if (nextMatch?.currentMatch) {
-        new_standing.match1 = nextMatch?.currentMatch;
+        new_standing.match1 = { ...nextMatch?.currentMatch };
         totalLeagueScore += new_standing?.match1?.leagueScore ?? 0;
         priorOpponents[new_standing?.match1?.opponent ?? ""] = 0;
         totalTop4++;
     }
     nextMatch = findNextMatch(currentWeek, sortedMatches, nextMatch?.matchIndex, priorOpponents, playerStanding);
     if (nextMatch?.currentMatch) {
-        new_standing.match2 = nextMatch?.currentMatch;
+        new_standing.match2 = { ...nextMatch?.currentMatch };
         totalLeagueScore += new_standing?.match2?.leagueScore ?? 0;
         priorOpponents[new_standing?.match2?.opponent ?? ""] = 0;
         totalTop4++;
     }
     nextMatch = findNextMatch(currentWeek, sortedMatches, nextMatch?.matchIndex, priorOpponents, playerStanding);
     if (nextMatch?.currentMatch) {
-        new_standing.match3 = nextMatch?.currentMatch;
+        new_standing.match3 = { ...nextMatch?.currentMatch };
         totalLeagueScore += new_standing?.match3?.leagueScore ?? 0;
         priorOpponents[new_standing?.match3?.opponent ?? ""] = 0;
         totalTop4++;
     }
     nextMatch = findNextMatch(currentWeek, sortedMatches, nextMatch?.matchIndex, priorOpponents, playerStanding);
     if (nextMatch?.currentMatch) {
-        new_standing.match4 = nextMatch?.currentMatch;
+        new_standing.match4 = { ...nextMatch?.currentMatch };
         totalLeagueScore += new_standing?.match4?.leagueScore ?? 0;
         priorOpponents[new_standing.match4.opponent ?? ""] = 0;
         totalTop4++;
@@ -331,6 +351,7 @@ const build = (players: Player[], matches: Match[], leagueStartDate: string, lea
                     army: player.army,
                     avgLeagueScore: 0.0,
                     totalMatches: 0,
+                    totalOORMatches: 0,
                 };
 
                 let priorPlayerStanding: PlayerStanding | null = getPlayerStanding(standingsForPriorWeek, player.name);
@@ -355,6 +376,10 @@ const build = (players: Player[], matches: Match[], leagueStartDate: string, lea
                     if (!matchesByPlayer.hasOwnProperty(player.name)) matchesByPlayer[player.name] = [];
                     matchesByPlayer[player.name] = [...matchesByPlayer[player.name], ...matches];
                     playerStanding.totalMatches = matchesByPlayer[player.name].length;
+                    playerStanding.totalOORMatches = matchesByPlayer[player.name].filter(
+                        (match) =>
+                            match.isMatchEligible === false && match.notEligibleReason === EligibilityReasons.OutOfRank
+                    ).length;
                 } else if (priorPlayerStanding) {
                     playerStanding = priorPlayerStanding;
                 }
@@ -375,6 +400,7 @@ const build = (players: Player[], matches: Match[], leagueStartDate: string, lea
 
         let priorRankPlayerScore = 0.0;
         let deferRank = 1;
+        let rankPS = 1;
         for (let playerRank = 0; playerRank < leagueStandingsByWeek[week].length; playerRank++) {
             const player = leagueStandingsByWeek[week][playerRank];
 
@@ -383,6 +409,9 @@ const build = (players: Player[], matches: Match[], leagueStartDate: string, lea
             } else {
                 player.rank = playerRank + 1;
                 deferRank = 1;
+            }
+            if (player.match1 && player.match2 && player.match3 && player.match4) {
+                player.rankPS = rankPS++;
             }
             priorRankPlayerScore = player.avgLeagueScore;
         }
