@@ -9,7 +9,7 @@ export default function StandingsTable({ leagueWeek, standings, matchesByPlayer 
 
     const generateMatchShorthand = (match) => {
         if (match) {
-            const playerScoreLine = `${match.playerScore > match.opponentScore ? "W" : "L"} ${match.playerScore} - ${
+            const playerScoreLine = `${match.playerScore === match.opponentScore ? "T" : match.playerScore > match.opponentScore ? "W" : "L"} ${match.playerScore} - ${
                 match.opponentScore
             }`;
             return (
