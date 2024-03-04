@@ -51,6 +51,7 @@ interface PlayerStanding {
     player: string;
     army: string;
     avgLeagueScore: number;
+    avgDefensiveScore: number;
     rank?: number;
     rankPS?: number;
     totalMatches: number;
@@ -249,6 +250,7 @@ const determineTop4Matches = (
 
     let totalTop4 = 0;
     let totalLeagueScore = 0.0;
+    let totalOpponentDefensiveScore = 0.0;
     let matchIndex = 0;
     const priorOpponents: { [key: string]: number } = {};
 
@@ -286,6 +288,7 @@ const determineTop4Matches = (
     if (nextMatch?.currentMatch) {
         new_standing.match1 = { ...nextMatch?.currentMatch };
         totalLeagueScore += new_standing?.match1?.leagueScore ?? 0;
+        totalOpponentDefensiveScore += new_standing?.match1?.opponentScore ?? 0
         priorOpponents[new_standing?.match1?.opponent ?? ""] = 0;
         totalTop4++;
     }
@@ -293,6 +296,7 @@ const determineTop4Matches = (
     if (nextMatch?.currentMatch) {
         new_standing.match2 = { ...nextMatch?.currentMatch };
         totalLeagueScore += new_standing?.match2?.leagueScore ?? 0;
+        totalOpponentDefensiveScore += new_standing?.match2?.opponentScore ?? 0
         priorOpponents[new_standing?.match2?.opponent ?? ""] = 0;
         totalTop4++;
     }
@@ -300,6 +304,7 @@ const determineTop4Matches = (
     if (nextMatch?.currentMatch) {
         new_standing.match3 = { ...nextMatch?.currentMatch };
         totalLeagueScore += new_standing?.match3?.leagueScore ?? 0;
+        totalOpponentDefensiveScore += new_standing?.match3?.opponentScore ?? 0
         priorOpponents[new_standing?.match3?.opponent ?? ""] = 0;
         totalTop4++;
     }
@@ -307,6 +312,7 @@ const determineTop4Matches = (
     if (nextMatch?.currentMatch) {
         new_standing.match4 = { ...nextMatch?.currentMatch };
         totalLeagueScore += new_standing?.match4?.leagueScore ?? 0;
+        totalOpponentDefensiveScore += new_standing?.match4?.opponentScore ?? 0
         priorOpponents[new_standing.match4.opponent ?? ""] = 0;
         totalTop4++;
     }
@@ -314,6 +320,7 @@ const determineTop4Matches = (
     return {
         ...new_standing,
         leagueScore: totalTop4 > 0 ? totalLeagueScore / totalTop4 : 0.0,
+        defensiveScore: totalTop4 > 0 ? totalOpponentDefensiveScore / totalTop4 : 0.0,
         matches: [...sortedMatches.filter((m) => m.leagueWeek === currentWeek)],
     };
 };
@@ -350,6 +357,7 @@ const build = (players: Player[], matches: Match[], leagueStartDate: string, lea
                     player: player.name,
                     army: player.army,
                     avgLeagueScore: 0.0,
+                    avgDefensiveScore: 0.0,
                     totalMatches: 0,
                     totalOORMatches: 0,
                 };
@@ -357,12 +365,14 @@ const build = (players: Player[], matches: Match[], leagueStartDate: string, lea
                 let priorPlayerStanding: PlayerStanding | null = getPlayerStanding(standingsForPriorWeek, player.name);
 
                 if (matchesForCurrentWeek && matchesForCurrentWeek.hasOwnProperty(player.name)) {
-                    const { match1, match2, match3, match4, leagueScore, matches } = determineTop4Matches(
+                    const { match1, match2, match3, match4, leagueScore, defensiveScore, matches } = determineTop4Matches(
                         week,
                         player,
                         matchesForCurrentWeek[player.name],
                         standingsForPriorWeek
                     );
+
+                    console.info(defensiveScore);
 
                     playerStanding = {
                         ...playerStanding,
@@ -371,6 +381,7 @@ const build = (players: Player[], matches: Match[], leagueStartDate: string, lea
                         match3,
                         match4,
                         avgLeagueScore: leagueScore,
+                        avgDefensiveScore: defensiveScore,
                     };
 
                     if (!matchesByPlayer.hasOwnProperty(player.name)) matchesByPlayer[player.name] = [];
@@ -393,8 +404,11 @@ const build = (players: Player[], matches: Match[], leagueStartDate: string, lea
         }
 
         leagueStandingsByWeek[week] = leagueStandingsByWeek[week]?.sort((a: PlayerStanding, b: PlayerStanding) => {
-            if (a.avgLeagueScore < b.avgLeagueScore) return 1;
-            if (a.avgLeagueScore > b.avgLeagueScore) return -1;
+            const playerALowestScore = a.match4?.opponentScore ?? a.match3?.opponentScore ?? a.match2?.opponentScore ?? a.match1?.opponentScore ?? 0;
+            const playerBLowestScore = b.match4?.opponentScore ?? b.match3?.opponentScore ?? b.match2?.opponentScore ?? b.match1?.opponentScore ?? 0;
+            
+            if (a.avgLeagueScore < b.avgLeagueScore || (a.avgLeagueScore === b.avgLeagueScore && playerALowestScore > playerBLowestScore)) return 1;
+            if (a.avgLeagueScore > b.avgLeagueScore || (a.avgLeagueScore === b.avgLeagueScore && playerALowestScore < playerBLowestScore)) return -1;
             return 0;
         });
 
