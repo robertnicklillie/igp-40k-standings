@@ -199,13 +199,13 @@ const isMatchEligible = (
     opponentStanding: PlayerStanding | null
 ) => {
     // player rank
-    const playerRank = playerStanding?.rank;
-    const opponentRank = opponentStanding?.rank;
-    if (match.leagueWeek === currentWeek && playerRank && opponentRank && opponentRank - playerRank > 5) {
-        match.playerRank = playerRank ?? 1;
-        match.opponentRank = opponentRank ?? 1;
-        return { yesNo: false, reason: EligibilityReasons.OutOfRank };
-    }
+    // const playerRank = playerStanding?.rank;
+    // const opponentRank = opponentStanding?.rank;
+    // if (match.leagueWeek === currentWeek && playerRank && opponentRank && opponentRank - playerRank > 5) {
+    //     match.playerRank = playerRank ?? 1;
+    //     match.opponentRank = opponentRank ?? 1;
+    //     return { yesNo: false, reason: EligibilityReasons.OutOfRank };
+    // }
 
     // prior opponent
     if (priorOpponents.hasOwnProperty(match.opponent)) {
