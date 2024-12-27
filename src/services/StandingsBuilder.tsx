@@ -60,6 +60,8 @@ interface PlayerStanding {
     match2?: WeeklyMatch;
     match3?: WeeklyMatch;
     match4?: WeeklyMatch;
+    match5?: WeeklyMatch;
+    match6?: WeeklyMatch;
 }
 
 interface Standing {
@@ -68,6 +70,8 @@ interface Standing {
     match2?: WeeklyMatch;
     match3?: WeeklyMatch;
     match4?: WeeklyMatch;
+    match5?: WeeklyMatch;
+    match6?: WeeklyMatch;
 }
 
 interface StandingsByWeek {
@@ -220,7 +224,7 @@ const isMatchEligible = (
     return { yesNo: true, reason: "" };
 };
 
-const determineTop4Matches = (
+const determineTop6Matches = (
     currentWeek: number,
     player: Player,
     matchesForPlayer: WeeklyMatch[],
@@ -233,6 +237,8 @@ const determineTop4Matches = (
     if (playerStanding?.match2) allMatches.push(playerStanding.match2);
     if (playerStanding?.match3) allMatches.push(playerStanding.match3);
     if (playerStanding?.match4) allMatches.push(playerStanding.match4);
+    if (playerStanding?.match5) allMatches.push(playerStanding.match5);
+    if (playerStanding?.match6) allMatches.push(playerStanding.match6);
 
     const sortedMatches = allMatches.sort((a: WeeklyMatch, b: WeeklyMatch) => {
         if (a.leagueScore < b.leagueScore) return 1;
@@ -245,10 +251,12 @@ const determineTop4Matches = (
         match2: undefined,
         match3: undefined,
         match4: undefined,
+        match5: undefined,
+        match6: undefined,
         leagueScore: 0.0,
     };
 
-    let totalTop4 = 0;
+    let totalTop6 = 0;
     let totalLeagueScore = 0.0;
     let totalOpponentDefensiveScore = 0.0;
     let matchIndex = 0;
@@ -290,7 +298,7 @@ const determineTop4Matches = (
         totalLeagueScore += new_standing?.match1?.leagueScore ?? 0;
         totalOpponentDefensiveScore += new_standing?.match1?.opponentScore ?? 0
         priorOpponents[new_standing?.match1?.opponent ?? ""] = 0;
-        totalTop4++;
+        totalTop6++;
     }
     nextMatch = findNextMatch(currentWeek, sortedMatches, nextMatch?.matchIndex, priorOpponents, playerStanding);
     if (nextMatch?.currentMatch) {
@@ -298,7 +306,7 @@ const determineTop4Matches = (
         totalLeagueScore += new_standing?.match2?.leagueScore ?? 0;
         totalOpponentDefensiveScore += new_standing?.match2?.opponentScore ?? 0
         priorOpponents[new_standing?.match2?.opponent ?? ""] = 0;
-        totalTop4++;
+        totalTop6++;
     }
     nextMatch = findNextMatch(currentWeek, sortedMatches, nextMatch?.matchIndex, priorOpponents, playerStanding);
     if (nextMatch?.currentMatch) {
@@ -306,7 +314,7 @@ const determineTop4Matches = (
         totalLeagueScore += new_standing?.match3?.leagueScore ?? 0;
         totalOpponentDefensiveScore += new_standing?.match3?.opponentScore ?? 0
         priorOpponents[new_standing?.match3?.opponent ?? ""] = 0;
-        totalTop4++;
+        totalTop6++;
     }
     nextMatch = findNextMatch(currentWeek, sortedMatches, nextMatch?.matchIndex, priorOpponents, playerStanding);
     if (nextMatch?.currentMatch) {
@@ -314,13 +322,29 @@ const determineTop4Matches = (
         totalLeagueScore += new_standing?.match4?.leagueScore ?? 0;
         totalOpponentDefensiveScore += new_standing?.match4?.opponentScore ?? 0
         priorOpponents[new_standing.match4.opponent ?? ""] = 0;
-        totalTop4++;
+        totalTop6++;
+    }
+    nextMatch = findNextMatch(currentWeek, sortedMatches, nextMatch?.matchIndex, priorOpponents, playerStanding);
+    if (nextMatch?.currentMatch) {
+        new_standing.match5 = { ...nextMatch?.currentMatch };
+        totalLeagueScore += new_standing?.match5?.leagueScore ?? 0;
+        totalOpponentDefensiveScore += new_standing?.match5?.opponentScore ?? 0
+        priorOpponents[new_standing.match5.opponent ?? ""] = 0;
+        totalTop6++;
+    }
+    nextMatch = findNextMatch(currentWeek, sortedMatches, nextMatch?.matchIndex, priorOpponents, playerStanding);
+    if (nextMatch?.currentMatch) {
+        new_standing.match6 = { ...nextMatch?.currentMatch };
+        totalLeagueScore += new_standing?.match6?.leagueScore ?? 0;
+        totalOpponentDefensiveScore += new_standing?.match6?.opponentScore ?? 0
+        priorOpponents[new_standing.match6.opponent ?? ""] = 0;
+        totalTop6++;
     }
 
     return {
         ...new_standing,
-        leagueScore: totalTop4 > 0 ? totalLeagueScore / totalTop4 : 0.0,
-        defensiveScore: totalTop4 > 0 ? totalOpponentDefensiveScore / totalTop4 : 0.0,
+        leagueScore: totalTop6 > 0 ? totalLeagueScore / totalTop6 : 0.0,
+        defensiveScore: totalTop6 > 0 ? totalOpponentDefensiveScore / totalTop6 : 0.0,
         matches: [...sortedMatches.filter((m) => m.leagueWeek === currentWeek)],
     };
 };
@@ -365,7 +389,7 @@ const build = (players: Player[], matches: Match[], leagueStartDate: string, lea
                 let priorPlayerStanding: PlayerStanding | null = getPlayerStanding(standingsForPriorWeek, player.name);
 
                 if (matchesForCurrentWeek && matchesForCurrentWeek.hasOwnProperty(player.name)) {
-                    const { match1, match2, match3, match4, leagueScore, defensiveScore, matches } = determineTop4Matches(
+                    const { match1, match2, match3, match4, match5, match6, leagueScore, defensiveScore, matches } = determineTop6Matches(
                         week,
                         player,
                         matchesForCurrentWeek[player.name],
@@ -380,6 +404,8 @@ const build = (players: Player[], matches: Match[], leagueStartDate: string, lea
                         match2,
                         match3,
                         match4,
+                        match5,
+                        match6,
                         avgLeagueScore: leagueScore,
                         avgDefensiveScore: defensiveScore,
                     };
@@ -404,8 +430,23 @@ const build = (players: Player[], matches: Match[], leagueStartDate: string, lea
         }
 
         leagueStandingsByWeek[week] = leagueStandingsByWeek[week]?.sort((a: PlayerStanding, b: PlayerStanding) => {
-            const playerALowestScore = a.match4?.opponentScore ?? a.match3?.opponentScore ?? a.match2?.opponentScore ?? a.match1?.opponentScore ?? 0;
-            const playerBLowestScore = b.match4?.opponentScore ?? b.match3?.opponentScore ?? b.match2?.opponentScore ?? b.match1?.opponentScore ?? 0;
+                const playerALowestScore = 
+                    a.match6?.opponentScore ?? 
+                    a.match5?.opponentScore ??
+                    a.match4?.opponentScore ??
+                    a.match3?.opponentScore ?? 
+                    a.match2?.opponentScore ?? 
+                    a.match1?.opponentScore ?? 
+                    0;
+                
+                const playerBLowestScore = 
+                    b.match6?.opponentScore ??
+                    b.match5?.opponentScore ??    
+                    b.match4?.opponentScore ?? 
+                    b.match3?.opponentScore ?? 
+                    b.match2?.opponentScore ?? 
+                    b.match1?.opponentScore ?? 
+                    0;
             
             if (a.avgLeagueScore < b.avgLeagueScore || (a.avgLeagueScore === b.avgLeagueScore && playerALowestScore > playerBLowestScore)) return 1;
             if (a.avgLeagueScore > b.avgLeagueScore || (a.avgLeagueScore === b.avgLeagueScore && playerALowestScore < playerBLowestScore)) return -1;

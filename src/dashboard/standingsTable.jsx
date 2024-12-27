@@ -79,33 +79,29 @@ export default function StandingsTable({ leagueWeek, standings, matchesByPlayer 
                     key: "match4",
                     render: (match) => generateMatchShorthand(match),
                 },
+                {
+                    title: "Match 5",
+                    dataIndex: "match5",
+                    key: "match5",
+                    render: (match) => generateMatchShorthand(match),
+                },
+                {
+                    title: "Match 6",
+                    dataIndex: "match6",
+                    key: "match6",
+                    render: (match) => generateMatchShorthand(match),
+                },
             ]
         },
         {
             title: "Post Season",
             children: [
                 {
-                    title: "Championship Rank",
+                    title: "Tournament Rank",
                     dataIndex: "rankPS",
                     key: "rankPS",
-                    render: (rank) => <span style={{ fontSize: "24px", fontWeight: "bold", color: "#32a83a" }}>{rank ?? ""}</span>,
-                },
-                {
-                    title: "Total Matches",
-                    dataIndex: "totalMatches",
-                    key: "totalMatches",
-                },
-                {
-                    title: "Out of Rank Matches",
-                    dataIndex: "totalOORMatches",
-                    key: "totalOORMatches",
-                },
-                {
-                    title: "Opponent Average Defensive Score",
-                    dataIndex: "avgDefensiveScore",
-                    key: "avgDefensiveScore",
-                },
-                
+                    render: (rank) => <span style={{ fontSize: "24px", fontWeight: "bold", color: "#32a83a" }}>{rank ?? "N/A"}</span>,
+                }
             ]
         }
     ];
@@ -141,15 +137,17 @@ export default function StandingsTable({ leagueWeek, standings, matchesByPlayer 
             dataIndex: "leagueScore",
             key: "leagueScore",
             render: (_, match) => {
-                const isTop4 =
+                const isTop6 =
                     playerStandings[0]?.match1?.key === match.key ||
                     playerStandings[0]?.match2?.key === match.key ||
                     playerStandings[0]?.match3?.key === match.key ||
-                    playerStandings[0]?.match4?.key === match.key;
+                    playerStandings[0]?.match4?.key === match.key ||
+                    playerStandings[0]?.match5?.key === match.key ||
+                    playerStandings[0]?.match6?.key === match.key;
 
                 return (
                     <>
-                        {isTop4 && <FireTwoTone />} {match.leagueScore}
+                        {isTop6 && <FireTwoTone />} {match.leagueScore}
                     </>
                 );
             },
