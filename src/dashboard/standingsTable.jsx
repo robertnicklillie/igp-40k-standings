@@ -22,7 +22,7 @@ export default function StandingsTable({ leagueWeek, standings, matchesByPlayer 
         return <>---</>;
     };
 
-    // Rank	Avg LEAGUE Score	Player	Army	Match 1	Match 2	Match 3	Match 4
+    // Rank	Avg LEAGUE Score	Player	Army	Match 1	Match 2	Match 3	Match 4 Match 5 Match 6
     const standingsColumns = [
         {
             title: "Regular Season",
