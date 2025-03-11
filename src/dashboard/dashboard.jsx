@@ -99,7 +99,7 @@ export default function Dashboard() {
                     matchesByPlayer={standings.matchesByPlayer}
                 />
             )}
-            <div>Version 11</div>
+            <div>Version 12</div>
         </>
     );
 }
