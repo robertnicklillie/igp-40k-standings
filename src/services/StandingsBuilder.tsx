@@ -465,7 +465,7 @@ const build = (players: Player[], matches: Match[], leagueStartDate: string, lea
                 player.rank = playerRank + 1;
                 deferRank = 1;
             }
-            if (player.match1 && player.match2 && player.match3 && player.match4) {
+            if (player.match1 && player.match2 && player.match3 && player.match4 && player.match5 && player.match6) {
                 player.rankPS = rankPS++;
             }
             priorRankPlayerScore = player.avgLeagueScore;

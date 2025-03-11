@@ -15,6 +15,7 @@ const armyHashMap = {
   "Death Guard": {},
   Deathwatch: {},
   Drukhari: {},
+  "Emperor's Children": {},
   "Genestealer Cults": {},
   "Grey Knights": {},
   "Imperial Agents": {},
