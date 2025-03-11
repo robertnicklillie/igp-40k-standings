@@ -100,7 +100,7 @@ export default function StandingsTable({ leagueWeek, standings, matchesByPlayer 
                     title: "Tournament Rank",
                     dataIndex: "rankPS",
                     key: "rankPS",
-                    render: (rank) => <span style={{ fontSize: "24px", fontWeight: "bold", color: "#32a83a" }}>{rank ?? "N/A"}</span>,
+                    render: (rank) => <span style={{ fontSize: "24px", fontWeight: "bold", color: rank ? "#32a83a" : "#808080" }}>{rank ?? "n/a"}</span>,
                 }
             ]
         }
