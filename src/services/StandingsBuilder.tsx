@@ -216,10 +216,10 @@ const isMatchEligible = (
         return { yesNo: false, reason: EligibilityReasons.PriorOpponent };
     }
 
-    // is registered army
-    if (match.playerArmy !== playerArmy) {
-        return { yesNo: false, reason: EligibilityReasons.NotRegisteredArmy };
-    }
+    // // is registered army
+    // if (match.playerArmy !== playerArmy) {
+    //     return { yesNo: false, reason: EligibilityReasons.NotRegisteredArmy };
+    // }
 
     return { yesNo: true, reason: "" };
 };
