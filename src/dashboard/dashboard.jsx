@@ -22,20 +22,6 @@ export default function Dashboard() {
     const [matches, setMatches] = useState(null);
 
     const [standings, setStandings] = useState(null);
-    const [leagueWeek, setLeagueWeek] = useState(null);
-
-    const getLeagueDates = () => {
-        // use start date and end date from the query string
-        const urlParams = new URLSearchParams(window.location.search);
-        const startDate = urlParams.get("startDate");
-        const endDate = urlParams.get("endDate");
-        if (!startDate || !endDate) {
-            throw Error("Must provide a start date and end date in the query string, ie ?startDate=x&endDate=x");
-        }
-        return { startDate, endDate };
-    };
-
-    const [leagueDates] = useState(getLeagueDates());
 
     const handlePlayersChange = (event) => {
         setPlayerData(event.target.value);
@@ -52,14 +38,7 @@ export default function Dashboard() {
     };
 
     const handleGenerateStandings = () => {
-        //const leagueStartDate = "11/28/2023";
-        //const leagueEndDate = "3/31/2024";
-        const { startDate, endDate } = leagueDates;
-        const currentDate = new Date().toLocaleDateString();
-
-        setStandings(StandingsBuilder.Build(players, matches, startDate, endDate));
-        setLeagueWeek(StandingsBuilder.GetCurrentLeagueWeekFor(currentDate, startDate, endDate));
-
+        setStandings(StandingsBuilder.build(players, matches));
         setDisplay(Display.Standings);
     };
 
@@ -89,12 +68,11 @@ export default function Dashboard() {
                             Generate Standings
                         </Button>
                     </div>
-                    <ValidationTable players={players} matches={matches} />
+                    <ValidationTable matches={matches} />
                 </>
             )}
             {display === Display.Standings && (
                 <StandingsTable
-                    leagueWeek={leagueWeek}
                     standings={standings}
                     matchesByPlayer={standings.matchesByPlayer}
                 />

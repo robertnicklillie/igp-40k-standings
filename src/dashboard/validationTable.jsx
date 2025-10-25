@@ -1,30 +1,6 @@
 import { Table, Tag } from "antd";
 
 export default function Standings({ players, matches }) {
-  const playerColumns = [
-    {
-      title: "Name",
-      dataIndex: "name",
-      key: "name",
-    },
-    {
-      title: "Army",
-      dataIndex: "army",
-      key: "army",
-      render: (_, item) => (
-        <Tag key={item.key} color={item.isArmyValid ? "blue" : "red-inverse"}>{item.army}</Tag>
-      )
-    },
-    {
-      title: "IsActive",
-      dataIndex: "isActive",
-      key: "isActive",
-      render: (_, item) => (
-        <Tag key={item.key} color={item.isActive ? "blue" : "orange"}>{item.isActive ? "Yes" : "No"}</Tag>
-      )
-    },
-  ];
-
   const matchColumns = [
     {
       title: "Player 1",
@@ -77,14 +53,6 @@ export default function Standings({ players, matches }) {
 
   return (
     <>
-      <div>
-        <h2>Players</h2>
-        <Table
-          pagination={false}
-          columns={playerColumns}
-          dataSource={players}
-        />
-      </div>
       <div>
         <h2>Matches</h2>
         <Table
