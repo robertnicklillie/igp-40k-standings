@@ -16,7 +16,7 @@ export default function StandingsTable({ standings }) {
                     continue;
                 }
 
-                if (i == 5) { qualifiesForTournament = true; }
+                if (i === 5) { qualifiesForTournament = true; }
 
                 let winOrLoss = match.playerScore === match.opponentScore ? "T" : match.playerScore > match.opponentScore ? "W" : "L";
                 let playerByLine = `${winOrLoss} ${match.playerScore} - ${match.opponentScore} ${match.playerArmy}`;
